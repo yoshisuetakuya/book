@@ -10,7 +10,8 @@ function App() {
   const [updateAuthor, setUpdateAuthor] = useState("");
   const [updateImpression, setUpdateImpression] = useState("");
   const [editingId, setEditingId] = useState(null);
-  // const [searchWord, setSearchWord] = useState("");
+  const [searchWord, setSearchWord] = useState("");
+  const [sortState, setSortState] = useState("");
 
   //初回レンダリングで全件を表示する
   useEffect(() => {
@@ -53,8 +54,7 @@ function App() {
     })
       .then((json) => {
         console.log(json);
-        // データを更新する
-        // フィルターにかけて表示から消す
+        // 削除している
         setData(data.filter(item => item.bookid !== bookid));
       })
       .catch((error) => console.log("Error:", error));
@@ -80,33 +80,63 @@ function App() {
           }
         });
         setData(updateData);
-        setUpdateTitle("");
-        setUpdateAuthor("");
-        setUpdateImpression("");
         setEditingId(null);//新しく更新した後にsetEditingIdにnullをセットしておくことで編集のボタンに変わる
       })
       .catch((error) => console.log("Error:", error));
   }
 
-  // //本の検索処理
-  // function handleSearch() {
-  //   fetch("http://localhost:8080/Search", {
-  //     method: 'POST',
-  //     body: JSON.stringify({ "keyword": searchWord }),
-  //     headers: {
-  //       'Content-type': 'application/json',
-  //     },
-  //   })
-  //     .then((res) => res.json())
-  //     .then((json) => {
-  //       console.log(json);
-  //       // 入力フォームを空にする
-  //       setData(json)
-  //       setSearchWord("");
-  //     })
-  //     .catch((error) => console.error('Error:', error));
-  // };
-  
+  //本の検索処理
+  function handleSearch() {
+    fetch("http://localhost:8080/Search", {
+      method: 'POST',
+      body: JSON.stringify({ "keyword": searchWord }),
+      headers: {
+        'Content-type': 'application/json',
+      },
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        console.log(json);
+        setData(json)
+        setSearchWord(""); // 入力フォームを空にする
+        setSortState("") // ソートしたまま検索をかけたときに元の並び順(bookid)に戻す
+      })
+      .catch((error) => console.error('Error:', error));
+  };
+
+  // タイトルでソートする機能
+  function handleTitleSort() {
+    if (sortState !== "ascTitle") {
+      // 現在のソート状態が「タイトルの昇順」ではない場合
+      // データをタイトルの昇順にソートします
+      const sortedData = [...data].sort((a, b) => (a.title < b.title ? -1 : 1));
+      setData(sortedData); // ソートされたデータを更新します
+      setSortState("ascTitle"); // ソート状態を「タイトルの昇順」に設定します
+    } else {
+      // 現在のソート状態が「タイトルの昇順」である場合
+      // データをタイトルの降順にソートします
+      const sortedData = [...data].sort((a, b) => (a.title > b.title ? -1 : 1));
+      setData(sortedData); // ソートされたデータを更新します
+      setSortState("descTitle"); // ソート状態を「タイトルの降順」に設定します
+    }
+  }
+  // 作者でソートする機能
+  function handleAuthorSort() {
+    if (sortState !== "ascAuthor") {
+      // 現在のソート状態が「作者の昇順」ではない場合
+      // データを作者の昇順にソートします
+      const sortedData = [...data].sort((a, b) => (a.author < b.author ? -1 : 1));
+      setData(sortedData); // ソートされたデータを更新します
+      setSortState("ascAuthor"); // ソート状態を「作者の昇順」に設定します
+    } else {
+      // 現在のソート状態が「作者の昇順」である場合
+      // データを作者の降順にソートします
+      const sortedData = [...data].sort((a, b) => (a.author > b.author ? -1 : 1));
+      setData(sortedData); // ソートされたデータを更新します
+      setSortState("descAuthor"); // ソート状態を「作者の降順」に設定します
+    }
+  }
+
   return (
     <>
       <h1>読書記録</h1>
@@ -117,15 +147,35 @@ function App() {
         <input placeholder="ひとこと感想" value={impression} onChange={(event) => setImpression(event.target.value)}></input>
         <button onClick={handleCreate}>追加</button>
       </div>
-      {/* <div>
+      <div>
         <input placeholder="検索フォーム" value={searchWord} onChange={(event) => setSearchWord(event.target.value)}></input>
         <button onClick={handleSearch}>検索</button>
-      </div> */}
+      </div>
       <table border={1}>
         <thead>
           <tr>
-            <th>タイトル</th>
-            <th>作者</th>
+            <th>
+              {(() => {
+                if (sortState === "ascTitle") {
+                  return <button onClick={handleTitleSort}>タイトル ↑</button>;
+                } else if (sortState === "descTitle") {
+                  return <button onClick={handleTitleSort}>タイトル ↓</button>;
+                } else {
+                  return <button onClick={handleTitleSort}>タイトル</button>;
+                }
+              })()}
+            </th>
+            <th>
+              {(() => {
+                if (sortState === "ascAuthor") {
+                  return <button onClick={handleAuthorSort}>作者 ↑</button>;
+                } else if (sortState === "descAuthor") {
+                  return <button onClick={handleAuthorSort}>作者 ↓</button>;
+                } else {
+                  return <button onClick={handleAuthorSort}>作者</button>;
+                }
+              })()}
+            </th>
             <th>ひとこと感想</th>
             <th>削除ボタン</th>
             <th>編集/更新ボタン</th>
