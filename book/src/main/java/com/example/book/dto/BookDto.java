@@ -8,14 +8,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-
-//JPAのエンティティであることを示すアノテーション
+/**
+ *
+ * @author 芳末　拓也
+ *　bookテーブルの情報を記載したクラス
+ */
 @Entity
 @Getter
 @Setter
 //エンティティに対応するテーブル名を指定。 "book"部分はPostgreSQLで作成したテーブル名
 @Table(name = "book")
-public class Dto {
+public class BookDto {
 	// エンティティの主キーを指定。今回であれば "bookid" カラムになる
 	@Id
 	//　bookidを自動採番する

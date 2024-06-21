@@ -18,7 +18,7 @@ function App() {
     fetch("http://localhost:8080/Get")  //fetchメソッドでhttp://localhost:8080/Getにデータを取得しに行く
       .then((res) => res.json())        //ここでjson形式のデータを取得
       .then((json) => setData(json))    //取得したデータをsetDataにセット
-      .catch((error) => console.log("Error:", error));     //エラーが起きた場合の処理
+      .catch((error) => console.log("Error:", error));
   }, []);                               //useEffectで第二引数に[]を渡し初回レンダリング時に実行させる
 
   // 本の追加処理
