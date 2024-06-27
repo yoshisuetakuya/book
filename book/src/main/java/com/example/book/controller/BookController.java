@@ -19,7 +19,7 @@ import com.example.book.service.BookService;
 /**
  *
  * @author 芳末　拓也
- * 本の取得・登録・更新・削除・検索を行うサービスクラス
+ * 本の取得・登録・更新・削除・検索を行うコントローラークラス
  *
  */
 @CrossOrigin(origins = "http://localhost:3000")

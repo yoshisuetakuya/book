@@ -36,4 +36,9 @@ public class BookDto {
 	@Column(name = "impression")
 	private String impression;
 
+	public void setKeyword(String string) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+
 }
