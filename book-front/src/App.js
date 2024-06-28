@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from "react";
 
+// URLの定数を定義
+const url = "http://localhost:8080";
+
 function App() {
-  //useStateでデータの保持
+  // useStateでデータの保持
   const [data, setData] = useState([]);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [impression, setImpression] = useState("");
-  const [updateTitle, setUpdateTitle] = useState("");
-  const [updateAuthor, setUpdateAuthor] = useState("");
-  const [updateImpression, setUpdateImpression] = useState("");
+  const [bookData, setBookData] = useState({
+    title: "",
+    author: "",
+    impression: "",
+  });
+  const [updateData, setUpdateData] = useState({
+    updateTitle: "",
+    updateAuthor: "",
+    updateImpression: "",
+  });
   const [editingId, setEditingId] = useState(null);
   const [searchWord, setSearchWord] = useState("");
   const [sortState, setSortState] = useState("");
 
-   // 初回レンダリング時にデータを全件取得する
+  // 初回レンダリング時にデータを全件取得する
   useEffect(() => {
-    fetch("http://localhost:8080/Get")  // fetchメソッドでサーバーからデータを取得
+    fetch(`${url}/Get`)  // fetchメソッドでサーバーからデータを取得
       .then((res) => res.json())        // 取得したレスポンスをjson形式に変換
       .then((json) => setData(json))    // jsonデータをセット
       .catch((error) => console.log("Error:", error));     // エラーが発生した場合の処理
@@ -23,9 +30,9 @@ function App() {
 
   // 本の追加処理
   function handleCreate() {
-    fetch("http://localhost:8080/Create", {
+    fetch(`${url}/Create`, {
       method: 'POST', // POSTメソッドを指定
-      body: JSON.stringify({ "title": title, "author": author, "impression": impression }),// リクエストボディに新規本データをセット
+      body: JSON.stringify({ "title": bookData.title, "author": bookData.author, "impression": bookData.impression }),// リクエストボディに新規本データをセット
       headers: {
         'Content-type': 'application/json',// リクエストヘッダーをJSON形式に指定
       },
@@ -33,14 +40,12 @@ function App() {
       .then((json) => {
         console.log(json);
         // 入力フォームを空にする
-        setTitle("");
-        setAuthor("");
-        setImpression("");
+        setBookData({ title: "", author: "", impression: "", });
       })
       .catch((error) => console.error('Error:', error))
       .finally(() => {
         // データを再取得する
-        fetch("http://localhost:8080/Get")
+        fetch(`${url}/Get`)
           .then((res) => res.json())
           .then((json) => setData(json))
           .catch((error) => console.error('Error:', error));
@@ -49,12 +54,12 @@ function App() {
 
   // 本の削除処理
   const handleDelete = (bookid) => {
-    fetch(`http://localhost:8080/Delete/${bookid}`, {
+    fetch(`${url}/Delete/${bookid}`, {
       method: 'DELETE',// DELETEメソッドを指定
     })
       .then((json) => {
         console.log(json);
-          // 削除後、データをフィルタリングして更新する
+        // 削除後、データをフィルタリングして更新する
         setData(data.filter(item => item.bookid !== bookid));
       })
       .catch((error) => console.log("Error:", error));
@@ -62,9 +67,9 @@ function App() {
 
   // 本の更新処理
   const handleUpdate = (bookid) => {
-    fetch(`http://localhost:8080/Update/${bookid}`, {
+    fetch(`${url}/Update/${bookid}`, {
       method: 'PUT',// PUTメソッドを指定
-      body: JSON.stringify({ "bookid": bookid, "title": updateTitle, "author": updateAuthor, "impression": updateImpression }), // リクエストボディに更新データをセット
+      body: JSON.stringify({ "bookid": bookid, "title": updateData.updateTitle, "author": updateData.updateAuthor, "impression": updateData.updateImpression }), // リクエストボディに更新データをセット
       headers: {
         'Content-type': 'application/json',// リクエストヘッダーをJSON形式に指定
       },
@@ -72,14 +77,14 @@ function App() {
       .then((json) => {
         console.log(json);
         // 該当のbookidで本のデータを更新する
-        const updateData = data.map(item => {
+        const updatedData = data.map(item => {
           if (item.bookid === bookid) {
-            return { ...item, "title": updateTitle, "author": updateAuthor, "impression": updateImpression };
+            return { ...item, "title": updateData.updateTitle, "author": updateData.updateAuthor, "impression": updateData.updateImpression };
           } else {
             return item;
           }
         });
-        setData(updateData);// 更新後のデータをセット
+        setData(updatedData);// 更新後のデータをセット
         setEditingId(null);// 更新後、nullを渡して編集モードを解除する
       })
       .catch((error) => console.log("Error:", error));
@@ -87,7 +92,7 @@ function App() {
 
   //本の検索処理
   function handleSearch() {
-    fetch("http://localhost:8080/Search", {
+    fetch(`${url}/Search`, {
       method: 'POST',// POSTメソッドを指定
       body: JSON.stringify({ "keyword": searchWord }), // リクエストボディに検索キーワードをセット
       headers: {
@@ -138,9 +143,9 @@ function App() {
       <h1>読書記録</h1>
       <div>
         <p>本を追加する</p>
-        <input placeholder="タイトル" value={title} onChange={(event) => setTitle(event.target.value)}></input>
-        <input placeholder="作者" value={author} onChange={(event) => setAuthor(event.target.value)}></input>
-        <input placeholder="ひとこと感想" value={impression} onChange={(event) => setImpression(event.target.value)}></input>
+        <input placeholder="タイトル" value={bookData.title} onChange={(event) => setBookData({ ...bookData, title: event.target.value })}></input>
+        <input placeholder="作者" value={bookData.author} onChange={(event) => setBookData({ ...bookData, author: event.target.value })}></input>
+        <input placeholder="ひとこと感想" value={bookData.impression} onChange={(event) => setBookData({ ...bookData, impression: event.target.value })}></input>
         <button onClick={handleCreate}>追加</button>
       </div>
       <div>
@@ -182,21 +187,21 @@ function App() {
             <tr key={item.bookid}>
               <td>
                 {editingId === item.bookid ? ( // 編集モード時にテキストボックスを表示
-                  <input placeholder="タイトルを入力して更新" value={updateTitle} onChange={(event) => setUpdateTitle(event.target.value)} />
+                  <input placeholder="タイトルを入力して更新" value={updateData.updateTitle} onChange={(event) => setUpdateData({ ...updateData, updateTitle: event.target.value })} />
                 ) : (
                   item.title // 通常時はタイトルを表示
                 )}
               </td>
               <td>
                 {editingId === item.bookid ? (// 編集モード時にテキストボックスを表示
-                  <input placeholder="作者を入力して更新" value={updateAuthor} onChange={(event) => setUpdateAuthor(event.target.value)} />
+                  <input placeholder="作者を入力して更新" value={updateData.updateAuthor} onChange={(event) => setUpdateData({ ...updateData, updateAuthor: event.target.value })} />
                 ) : (
                   item.author // 通常時は作者を表示
                 )}
               </td>
               <td>
                 {editingId === item.bookid ? (// 編集モード時にテキストボックスを表示
-                  <input placeholder="ひとこと感想を入力して更新" value={updateImpression} onChange={(event) => setUpdateImpression(event.target.value)} />
+                  <input placeholder="ひとこと感想を入力して更新" value={updateData.updateImpression} onChange={(event) => setUpdateData({ ...updateData, updateImpression: event.target.value })} />
                 ) : (
                   item.impression // 通常時は感想を表示
                 )}
@@ -209,9 +214,7 @@ function App() {
                   <button onClick={() => {
                     // 編集ボタンをクリックで編集モードに入り、初期値に本の情報をセット
                     setEditingId(item.bookid);
-                    setUpdateTitle(item.title);
-                    setUpdateAuthor(item.author);
-                    setUpdateImpression(item.impression);
+                    setUpdateData({ "updateTitle": item.title, "updateAuthor": item.author, "updateImpression": item.impression, });
                   }}>編集</button>
                 )}
               </td>
