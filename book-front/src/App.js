@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 // URLの定数を定義
 const url = "http://localhost:8080";
@@ -138,18 +138,50 @@ function App() {
     }
   }
 
+  const handleChange = useCallback((event, setBookData, bookData) => {
+    setBookData({ ...bookData, [event.target.name]: event.target.value });
+  }, []);
+
+  const handleUpdateChange = useCallback((event, setUpdateData, updateData) => {
+    setUpdateData({ ...updateData, [event.target.name]: event.target.value });
+  }, []);
+
+  const handleSearchWordChange = useCallback((event, setSearchWord) => {
+    setSearchWord(event.target.value);
+  }, []);
+
   return (
     <>
       <h1>読書記録</h1>
       <div>
         <p>本を追加する</p>
-        <input placeholder="タイトル" value={bookData.title} onChange={(event) => setBookData({ ...bookData, title: event.target.value })}></input>
-        <input placeholder="作者" value={bookData.author} onChange={(event) => setBookData({ ...bookData, author: event.target.value })}></input>
-        <input placeholder="ひとこと感想" value={bookData.impression} onChange={(event) => setBookData({ ...bookData, impression: event.target.value })}></input>
+        <input
+          name="title"
+          placeholder="タイトル"
+          value={bookData.title}
+          onChange={(event) => handleChange(event, setBookData, bookData)}
+        />
+        <input
+          name="author"
+          placeholder="作者"
+          value={bookData.author}
+          onChange={(event) => handleChange(event, setBookData, bookData)}
+        />
+        <input
+          name="impression"
+          placeholder="ひとこと感想"
+          value={bookData.impression}
+          onChange={(event) => handleChange(event, setBookData, bookData)}
+        />
         <button onClick={handleCreate}>追加</button>
       </div>
       <div>
-        <input placeholder="検索フォーム" value={searchWord} onChange={(event) => setSearchWord(event.target.value)}></input>
+        <input
+          name="searchWord"
+          placeholder="検索フォーム"
+          value={searchWord}
+          onChange={(event) => handleSearchWordChange(event, setSearchWord)}
+        />
         <button onClick={handleSearch}>検索</button>
       </div>
       <table border={1}>
@@ -187,21 +219,36 @@ function App() {
             <tr key={item.bookid}>
               <td>
                 {editingId === item.bookid ? ( // 編集モード時にテキストボックスを表示
-                  <input placeholder="タイトルを入力して更新" value={updateData.updateTitle} onChange={(event) => setUpdateData({ ...updateData, updateTitle: event.target.value })} />
+                  <input
+                    name="updateTitle"
+                    placeholder="タイトルを入力して更新"
+                    value={updateData.updateTitle}
+                    onChange={(event) => handleUpdateChange(event, setUpdateData, updateData)}
+                  />
                 ) : (
                   item.title // 通常時はタイトルを表示
                 )}
               </td>
               <td>
                 {editingId === item.bookid ? (// 編集モード時にテキストボックスを表示
-                  <input placeholder="作者を入力して更新" value={updateData.updateAuthor} onChange={(event) => setUpdateData({ ...updateData, updateAuthor: event.target.value })} />
+                  <input
+                    name="updateAuthor"
+                    placeholder="作者を入力して更新"
+                    value={updateData.updateAuthor}
+                    onChange={(event) => handleUpdateChange(event, setUpdateData, updateData)}
+                  />
                 ) : (
                   item.author // 通常時は作者を表示
                 )}
               </td>
               <td>
                 {editingId === item.bookid ? (// 編集モード時にテキストボックスを表示
-                  <input placeholder="ひとこと感想を入力して更新" value={updateData.updateImpression} onChange={(event) => setUpdateData({ ...updateData, updateImpression: event.target.value })} />
+                  <input
+                    name="updateImpression"
+                    placeholder="ひとこと感想を入力して更新"
+                    value={updateData.updateImpression}
+                    onChange={(event) => handleUpdateChange(event, setUpdateData, updateData)}
+                  />
                 ) : (
                   item.impression // 通常時は感想を表示
                 )}
